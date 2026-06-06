@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import testRoutes from './src/routes/test.routes.js';
 
 const app = express();
 
@@ -11,9 +12,11 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    message: '👋 Hello from server',
+    message: '🌐 Server is running...',
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use('/api/test', testRoutes);
 
 export default app;
