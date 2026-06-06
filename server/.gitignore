@@ -1,0 +1,33 @@
+node_modules
+
+# Keep environment variables out of version control
+.env
+
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Logs
+logs
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+
+# testing
+coverage
+
+# production
+build
+
+/src/generated/prisma
