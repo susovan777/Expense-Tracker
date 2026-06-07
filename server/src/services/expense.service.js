@@ -13,8 +13,9 @@ export const createExpenseService = async ({
 };
 
 // GET LIST
-export const getExpensesService = async () => {
+export const getExpensesService = async (category) => {
   return prisma.expense.findMany({
+    where: category ? { category } : {},
     orderBy: {
       createdAt: 'desc',
     },
@@ -38,5 +39,20 @@ export const updateExpenseService = async (id, data) => {
 export const deleteExpenseService = async (id) => {
   return prisma.expense.delete({
     where: { id: id },
+  });
+};
+
+// SEARCH
+export const searchExpensesService = async (searchTerm) => {
+  return prisma.expense.findMany({
+    where: {
+      OR: [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 };

@@ -3,6 +3,7 @@ import {
   deleteExpenseService,
   getExpenseByIdService,
   getExpensesService,
+  searchExpensesService,
   updateExpenseService,
 } from '../services/expense.service.js';
 
@@ -23,7 +24,8 @@ export const createExpense = async (req, res) => {
 // Get all expenses
 export const getExpenses = async (req, res) => {
   try {
-    const expenses = await getExpensesService();
+    const { category } = req.query;
+    const expenses = await getExpensesService(category);
     res
       .status(200)
       .json({ success: true, count: expenses.length, data: expenses });
@@ -89,16 +91,44 @@ export const deleteExpense = async (req, res) => {
       });
     }
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: '✅ Expense record deleted successfullly',
-      });
+    res.status(200).json({
+      success: true,
+      message: '✅ Expense record deleted successfullly',
+    });
   } catch (error) {
     console.error(error);
     res
       .status(500)
       .json({ success: false, message: '❌ Failed to delete expense' });
+  }
+};
+
+// Search expenses
+// GET /api/expenses/search?q=pizza
+export const searchExpense = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required',
+      });
+    }
+
+    const expenses = await searchExpensesService(q);
+
+    res.status(200).json({
+      success: true,
+      count: expenses.length,
+      data: expenses,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to search expenses',
+    });
   }
 };
