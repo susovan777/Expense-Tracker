@@ -1,6 +1,8 @@
 import {
   createExpenseService,
   deleteExpenseService,
+  getCategoriesService,
+  getDashboardStatsService,
   getExpenseByIdService,
   getExpensesService,
   searchExpensesService,
@@ -129,6 +131,53 @@ export const searchExpense = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to search expenses',
+    });
+  }
+};
+
+// Categories
+export const getCategories = async (req, res) => {
+  try {
+    const expenseCategories = await getCategoriesService();
+
+    if (!expenseCategories) {
+      return res.status(404).json({
+        success: false,
+        message: 'Categories not found',
+      });
+    }
+
+    res.status(200).json({ success: true, data: expenseCategories });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch categories',
+    });
+  }
+};
+
+// Get Dashboard Stats
+// GET /api/dashboard
+export const getDashboardStats = async (req, res) => {
+  try {
+    const dashboard = await getDashboardStatsService();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalExpenses: dashboard.totalExpenses._sum.amount ?? 0,
+        monthlyExpenses: dashboard.monthlyExpenses._sum.amount ?? 0,
+        recentTransactions: dashboard.recentTransactions,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard stats',
     });
   }
 };

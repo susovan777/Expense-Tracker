@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import testRoutes from './src/routes/test.routes.js';
 import expenseRoutes from './src/routes/expense.routes.js';
+import dashboardRoutes from './src/routes/dashboard.routes.js';
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.get('/', (req, res) => {
 
 app.use('/api/test', testRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 export default app;

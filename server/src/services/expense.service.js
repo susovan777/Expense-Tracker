@@ -42,7 +42,7 @@ export const deleteExpenseService = async (id) => {
   });
 };
 
-// SEARCH
+// SEARCH (Title or category)
 export const searchExpensesService = async (searchTerm) => {
   return prisma.expense.findMany({
     where: {
@@ -55,4 +55,35 @@ export const searchExpensesService = async (searchTerm) => {
       createdAt: 'desc',
     },
   });
+};
+
+// CATEGORIES
+export const getCategoriesService = async () => {
+  return prisma.expense.findMany({
+    distinct: ['category'],
+    select: {
+      category: true,
+    },
+  });
+};
+
+// GET DASHBOARD
+export const getDashboardStatsService = async () => {
+  const currentMonth = new Date();
+  const monthStart = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth()
+  );
+
+  const [totalExpenses, monthlyExpenses, recentTransactions] =
+    await Promise.all([
+      prisma.expense.aggregate({ _sum: { amount: true } }),
+      prisma.expense.aggregate({
+        where: { createdAt: { gte: monthStart } },
+        _sum: { amount: true },
+      }),
+      prisma.expense.findMany({ take: 5, orderBy: { createdAt: 'desc' } }),
+    ]);
+
+  return { totalExpenses, monthlyExpenses, recentTransactions };
 };
