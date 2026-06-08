@@ -3,11 +3,20 @@ import { Pencil, Trash2 } from 'lucide-react';
 import SectionTitle from '../components/SectionTitle';
 import useExpenses from '../hooks/useExpense.js';
 import useCategories from '../hooks/useCategories.js';
+import {
+  createExpense,
+  deleteExpense,
+  updateExpense,
+} from '../api/expenseApi.js';
+import ExpenseModal from '../components/expenses/ExpenseModal.jsx';
+import ExpenseForm from '../components/expenses/ExpenseForm.jsx';
 
 export default function Expenses() {
   const { expenses, loading, fetchExpenses } = useExpenses();
+  const [selectedExpense, setSelectedExpense] = useState(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const categories = useCategories();
 
   const filteredData =
@@ -23,6 +32,44 @@ export default function Expenses() {
     return () => clearTimeout(timeoutId);
   }, [fetchExpenses, search]);
 
+  const handleSubmitExpense = async (formData) => {
+    try {
+      if (selectedExpense) {
+        await updateExpense(selectedExpense.id, formData);
+      } else {
+        await createExpense(formData);
+      }
+
+      await fetchExpenses();
+
+      setSelectedExpense(null);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteExpense = async (id) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this expense?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteExpense(id);
+
+      await fetchExpenses();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedExpense(null);
+    setIsModalOpen(false);
+  };
+
   if (loading) {
     return <div className="text-center py-10">Loading expenses...</div>;
   }
@@ -35,7 +82,10 @@ export default function Expenses() {
           sub="All financial activity — May 2026"
         />
 
-        <button className="bg-gold px-4 py-2 rounded-lg">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-gold px-4 py-2 rounded-lg"
+        >
           Add Expense
         </button>
       </div>
@@ -128,10 +178,18 @@ export default function Expenses() {
                       {Number(tx.amount).toLocaleString()}
                     </td>
                     <td className="p-3 flex gap-4">
-                      <Pencil size={17} className="cursor-pointer" />
+                      <Pencil
+                        size={17}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedExpense(tx);
+                          setIsModalOpen(true);
+                        }}
+                      />
                       <Trash2
                         size={17}
                         className="cursor-pointer text-red-400"
+                        onClick={() => handleDeleteExpense(tx.id)}
                       />
                     </td>
                   </tr>
@@ -141,6 +199,17 @@ export default function Expenses() {
           )}
         </div>
       </div>
+
+      <ExpenseModal
+        title={selectedExpense ? 'Edit Expense' : 'Add Expense'}
+        open={isModalOpen}
+        onClose={closeModal}
+      >
+        <ExpenseForm
+          initialData={selectedExpense}
+          onSubmit={handleSubmitExpense}
+        />
+      </ExpenseModal>
     </div>
   );
 }

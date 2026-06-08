@@ -78,6 +78,13 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
+                <span
+                  className={`text-sm font-bold ${
+                    isCredit ? 'text-teal-accent' : 'text-red-accent'
+                  }`}
+                >
+                  {isCredit ? '+' : '-'}₹{tx.amount}
+                </span>
               </div>
             );
           })}
