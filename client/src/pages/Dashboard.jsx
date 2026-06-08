@@ -1,8 +1,14 @@
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import SectionTitle from '../components/SectionTitle.jsx';
-import { transactions, fmtSmall } from '../data/mockData.js';
+import useDashboard from '../hooks/useDashboard.js';
 
 export default function Dashboard() {
+  const { dashboard, loading } = useDashboard();
+
+  if (loading) {
+    return <div className="text-center py-10">Loading dashboard...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-linear-to-br from-surface-bg via-[#1A2240] to-surface-bg border border-gold/18 rounded-2xl p-8 relative overflow-hidden">
@@ -14,44 +20,40 @@ export default function Dashboard() {
           sub="Complete overview of your finances for May 2026"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white/4 rounded-xl p-4 border border-gold/12">
             <p className="text-[11px] text-muted-grey uppercase tracking-wider mb-1.5">
-              Monthly Income
+              Total Expenses
             </p>
             <p className="text-2xl font-bold text-gold font-display">
-              ₹204,500
+              ₹{Number(dashboard?.totalExpenses || 0).toLocaleString()}
             </p>
-            <p className="text-xs text-teal-accent mt-1">↑ 8.7% this year</p>
           </div>
           <div className="bg-white/4 rounded-xl p-4 border border-teal-accent/12">
             <p className="text-[11px] text-muted-grey uppercase tracking-wider mb-1.5">
               Monthly Expenses
             </p>
-            <p className="text-2xl font-bold text-teal-accent font-display">
-              ₹3,100
+            <p className="text-2xl font-bold text-amber-600 font-display">
+              ₹{Number(dashboard?.monthlyExpenses || 0).toLocaleString()}
             </p>
-            <p className="text-xs text-muted-grey mt-1">37.8% save rate</p>
-          </div>
-          <div className="bg-white/4 rounded-xl p-4 border border-blue-accent/12">
-            <p className="text-[11px] text-muted-grey uppercase tracking-wider mb-1.5">
-              Balance
-            </p>
-            <p className="text-2xl font-bold text-blue-accent font-display">
-              +₹892
-            </p>
-            <p className="text-xs text-blue-accent mt-1">↑ 1.63% today</p>
           </div>
         </div>
       </div>
 
       <div className="bg-card-bg border border-gold/18 rounded-2xl p-[22px]">
-        <p className="text-sm font-semibold text-[#F0EAD6] mb-4">
+        <p className="text-md font-semibold text-[#F0EAD6] mb-4">
           Recent Transactions
         </p>
         <div className="divide-y divide-gold/18">
-          {transactions.slice(0, 5).map((tx) => {
+          {dashboard?.recentTransactions?.slice(0, 5).map((tx) => {
             const isCredit = tx.type === 'credit';
+            const date = new Date(tx.createdAt);
+
+            const formattedDate = date.toLocaleDateString('en-US', {
+              month: 'short', // "Jun"
+              day: 'numeric', // "26"
+            });
+
             return (
               <div
                 key={tx.id}
@@ -69,21 +71,13 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#E8E3D5]">
-                      {tx.desc}
+                      {tx.title}
                     </p>
                     <p className="text-xs text-muted-grey">
-                      {tx.date} · {tx.category}
+                      {formattedDate} · {tx.category}
                     </p>
                   </div>
                 </div>
-                <span
-                  className={`text-sm font-bold ${
-                    isCredit ? 'text-teal-accent' : 'text-red-accent'
-                  }`}
-                >
-                  {isCredit ? '+' : '-'}
-                  {fmtSmall(tx.amount)}
-                </span>
               </div>
             );
           })}
