@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const backend_endpoint = import.meta.env.VITE_API_BASE_URL;
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: backend_endpoint,
 });
 
 export const getDashboard = async () => {
@@ -51,4 +53,3 @@ export const deleteExpense = async (id) => {
 
   return response.data;
 };
-
