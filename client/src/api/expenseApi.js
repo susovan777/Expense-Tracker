@@ -32,7 +32,7 @@ export const searchExpenses = async (query) => {
 };
 
 export const getCategories = async () => {
-  const response = await api.get('/categories');
+  const response = await api.get('/expenses/categories');
   return response.data;
 };
 

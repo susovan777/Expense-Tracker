@@ -1,23 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import SectionTitle from '../components/SectionTitle';
 import useExpenses from '../hooks/useExpense.js';
+import useCategories from '../hooks/useCategories.js';
 
 export default function Expenses() {
-  const { expenses, loading } = useExpenses();
+  const { expenses, loading, fetchExpenses } = useExpenses();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
-  const categories = [
-    'Food',
-    'Travel',
-    'Bills',
-    'Shopping',
-    'Health',
-    'Entertainment',
-    'Others',
-  ];
+  const categories = useCategories();
 
-  const filteredData = expenses;
+  const filteredData =
+    filter === 'All'
+      ? expenses
+      : expenses.filter((expense) => expense.category === filter);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchExpenses(search);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [fetchExpenses, search]);
 
   if (loading) {
     return <div className="text-center py-10">Loading expenses...</div>;
@@ -31,7 +35,7 @@ export default function Expenses() {
           sub="All financial activity — May 2026"
         />
 
-        <button className="bg-violet-500 px-4 py-2 rounded-lg">
+        <button className="bg-gold px-4 py-2 rounded-lg">
           Add Expense
         </button>
       </div>
@@ -56,9 +60,11 @@ export default function Expenses() {
               onChange={(e) => setFilter(e.target.value)}
               className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1"
             >
-              <option>All Categories</option>
+              <option value="All">All Categories</option>
               {categories.map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c.category} value={c.category}>
+                  {c.category}
+                </option>
               ))}
             </select>
           </div>

@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getExpenses } from '../api/expenseApi';
+import { getExpenses, searchExpenses } from '../api/expenseApi';
 
 export default function useExpenses() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchExpenses = useCallback(async () => {
+  const fetchExpenses = useCallback(async (searchTerm = '') => {
     try {
-      const response = await getExpenses();
+      const response = searchTerm
+        ? await searchExpenses(searchTerm)
+        : await getExpenses();
+
       setExpenses(response.data);
     } catch (error) {
-      console.error('Failed to fetch expenses', error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
